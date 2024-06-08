@@ -25,6 +25,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import AuthUser from 'src/core/decorators/auth-user.decorator';
 import { User } from './entities/user.entity';
 import { UserInfoResponseDto } from './dtos/user-info-response.dto';
+import { UpdatePasswordDto } from './dtos/update-password.dto';
 
 @ApiTags(SwaggerTag.USER)
 @ApiCommonErrorResponseTemplate()
@@ -94,5 +95,31 @@ export class UserController {
   async getUserInfo(@Res() res, @AuthUser() user: User) {
     const userInfo = await this.userService.getUserInfo(user.idx);
     return HttpResponse.ok(res, userInfo);
+  }
+
+  @ApiOperation({
+    summary: '비밀번호 수정',
+    description: '현재 비밀번호 입력 후 비밀번호를 변경한다.',
+  })
+  @ApiOkResponseTemplate()
+  @ApiErrorResponseTemplate([
+    {
+      status: StatusCodes.NOT_FOUND,
+      errorFormatList: [
+        HttpErrorConstants.CANNOT_FIND_USER,
+        HttpErrorConstants.INVALID_AUTH,
+      ],
+    },
+  ])
+  @UseAuthGuards()
+  @ApiBody({ type: UpdatePasswordDto })
+  @Patch('/password')
+  async updatePassword(
+    @Res() res,
+    @Body() dto: UpdatePasswordDto,
+    @AuthUser() user: User,
+  ) {
+    await this.userService.updatePassword(user.idx, dto);
+    return HttpResponse.ok(res);
   }
 }

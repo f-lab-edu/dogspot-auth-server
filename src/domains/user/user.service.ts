@@ -10,6 +10,8 @@ import { User } from './entities/user.entity';
 import { UserRepository } from './repositories/user.repository';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserInfoResponseDto } from './dtos/user-info-response.dto';
+import { hashPassword, validatePassword } from 'src/utils/password.utils';
+import { UpdatePasswordDto } from './dtos/update-password.dto';
 
 @Injectable()
 export class UserService {
@@ -100,5 +102,27 @@ export class UserService {
       throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
     }
     return new UserInfoResponseDto(userInfo);
+  }
+
+  /**
+   * 비밀번호 변경
+   * @param userIdx 유저인덱스
+   * @param dto UpdatePasswordDto
+   */
+  async updatePassword(userIdx: number, dto: UpdatePasswordDto) {
+    const user = await this.userRepository.findByUserIdx(userIdx);
+    if (!user) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
+    }
+    // 소셜로그인 유저는 비밀번호 변경 불가
+    if (user.loginMethod) {
+      throw new BadRequestException(
+        HttpErrorConstants.CANNOT_UPDATE_SOCIAL_USER,
+      );
+    }
+
+    await validatePassword(dto.currentPassword, user.password);
+    const newPassword = hashPassword(dto.newPassword);
+    await this.userRepository.updatePasswordByUserIdx(user.idx, newPassword);
   }
 }
