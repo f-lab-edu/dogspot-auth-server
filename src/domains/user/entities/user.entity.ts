@@ -2,6 +2,7 @@ import BaseEntity from 'src/core/entity/base.entity';
 import { hashPassword } from 'src/utils/password.utils';
 import { Column, Entity } from 'typeorm';
 import { SocialMethodType } from 'src/domains/auth/helpers/constants';
+import { UpdateUserDto } from './../dtos/update-user.dto';
 
 @Entity()
 export class User extends BaseEntity {
@@ -70,5 +71,11 @@ export class User extends BaseEntity {
     user.agreeWithMarketing = agreeWithMarketing;
     user.loginMethod = loginMethod;
     return user;
+  }
+
+  updateFromDto(dto: UpdateUserDto) {
+    this.email = dto.email;
+    this.nickname = dto.nickname;
+    this.profilePath = dto.profilePath;
   }
 }
