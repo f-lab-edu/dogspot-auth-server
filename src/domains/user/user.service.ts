@@ -16,6 +16,7 @@ import { VerifyEmailDto } from './dtos/verify-email.dto';
 import { VerifyEmailResponseDto } from './dtos/verify-email-response.dto';
 import * as uuid from 'uuid';
 import { EmailService } from '../email/email.service';
+import { DeleteUserDto } from './dtos/delete-user.dto';
 
 @Injectable()
 export class UserService {
@@ -172,5 +173,23 @@ export class UserService {
     await validatePassword(dto.currentPassword, user.password);
     const newPassword = hashPassword(dto.newPassword);
     await this.userRepository.updatePasswordByUserIdx(user.idx, newPassword);
+  }
+  /**
+   * 회원 탈퇴
+   * @param dto DeleteUserDto
+   */
+  async removeByPassword(dto: DeleteUserDto, userIdx: number) {
+    const password = dto.password;
+
+    const user = await this.userRepository.findByUserIdx(userIdx);
+    if (!user) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
+    }
+
+    // const redis = this.redisService.getClient();
+    // redis.del(`userInfo${userIdx}`);
+
+    await validatePassword(password, user.password);
+    await this.userRepository.softDelete(userIdx);
   }
 }

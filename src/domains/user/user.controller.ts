@@ -8,6 +8,7 @@ import {
   UseInterceptors,
   Patch,
   UploadedFile,
+  Delete,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dtos/create-user.dto';
@@ -28,6 +29,7 @@ import { UserInfoResponseDto } from './dtos/user-info-response.dto';
 import { UpdatePasswordDto } from './dtos/update-password.dto';
 import { VerifyEmailDto } from './dtos/verify-email.dto';
 import { VerifyEmailResponseDto } from './dtos/verify-email-response.dto';
+import { DeleteUserDto } from './dtos/delete-user.dto';
 
 @ApiTags(SwaggerTag.USER)
 @ApiCommonErrorResponseTemplate()
@@ -148,5 +150,26 @@ export class UserController {
   async findPassword(@Res() res, @Body() email: string) {
     const signupVerifyToken = await this.userService.findPassword(email);
     return HttpResponse.ok(res, signupVerifyToken);
+  }
+  @ApiOperation({
+    summary: '회원 탈퇴',
+    description: '비밀번호를 입력하여 회원 탈퇴한다. ',
+  })
+  @ApiOkResponseTemplate()
+  @ApiErrorResponseTemplate([
+    {
+      status: StatusCodes.NOT_FOUND,
+      errorFormatList: [
+        HttpErrorConstants.CANNOT_FIND_USER,
+        HttpErrorConstants.INVALID_AUTH,
+      ],
+    },
+  ])
+  @UseAuthGuards()
+  @ApiBody({ type: DeleteUserDto })
+  @Delete()
+  async remove(@Res() res, @Body() dto: DeleteUserDto, @AuthUser() user: User) {
+    await this.userService.removeByPassword(dto, user.idx);
+    return HttpResponse.ok(res);
   }
 }
