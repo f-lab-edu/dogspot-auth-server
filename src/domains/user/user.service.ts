@@ -12,10 +12,17 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserInfoResponseDto } from './dtos/user-info-response.dto';
 import { hashPassword, validatePassword } from 'src/utils/password.utils';
 import { UpdatePasswordDto } from './dtos/update-password.dto';
+import { VerifyEmailDto } from './dtos/verify-email.dto';
+import { VerifyEmailResponseDto } from './dtos/verify-email-response.dto';
+import * as uuid from 'uuid';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class UserService {
-  constructor(private userRepository: UserRepository) {}
+  constructor(
+    private userRepository: UserRepository,
+    private emailService: EmailService,
+  ) {}
   /**
    *  회원가입
    * @param dto CreateUserDto
@@ -26,6 +33,47 @@ export class UserService {
     await this.checkExistNickname(dto.nickname);
     const user = User.from(dto);
     return await this.userRepository.save(user);
+  }
+
+  /**
+   * 이메일 전송
+   * @param email 이메일
+   * @returns 이메일 인증 토큰
+   */
+  async sendMemberJoinEmail(
+    dto: VerifyEmailDto,
+  ): Promise<VerifyEmailResponseDto> {
+    const signupVerifyToken = uuid.v1();
+
+    const existEmail = await this.userRepository.existByEmail(dto.email);
+
+    if (!existEmail) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
+    }
+
+    await this.emailService.sendVerificationEmail(dto.email, signupVerifyToken);
+    return { signupVerifyToken: signupVerifyToken };
+  }
+
+  /**
+   * 이메일 전송
+   * @param email 이메일
+   * @returns 이메일 인증 토큰
+   */
+  async findPassword(email: string): Promise<VerifyEmailResponseDto> {
+    const signupVerifyToken = uuid.v1();
+
+    const existEmail = await this.userRepository.existByEmail(email);
+
+    if (!existEmail) {
+      throw new NotFoundException(HttpErrorConstants.CANNOT_FIND_USER);
+    }
+
+    await this.emailService.sendFindPasswordVerificationEmail(
+      email,
+      signupVerifyToken,
+    );
+    return { signupVerifyToken: signupVerifyToken };
   }
 
   /**

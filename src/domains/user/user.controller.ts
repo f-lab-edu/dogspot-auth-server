@@ -26,6 +26,8 @@ import AuthUser from 'src/core/decorators/auth-user.decorator';
 import { User } from './entities/user.entity';
 import { UserInfoResponseDto } from './dtos/user-info-response.dto';
 import { UpdatePasswordDto } from './dtos/update-password.dto';
+import { VerifyEmailDto } from './dtos/verify-email.dto';
+import { VerifyEmailResponseDto } from './dtos/verify-email-response.dto';
 
 @ApiTags(SwaggerTag.USER)
 @ApiCommonErrorResponseTemplate()
@@ -121,5 +123,30 @@ export class UserController {
   ) {
     await this.userService.updatePassword(user.idx, dto);
     return HttpResponse.ok(res);
+  }
+
+  @ApiOperation({
+    summary: '가입 인증 이메일 전송',
+    description: '회원가입시 이메일 인증을 한다.',
+  })
+  @ApiBody({ type: VerifyEmailDto })
+  @ApiCreatedResponseTemplate({ type: VerifyEmailResponseDto })
+  @Post('/email-verify')
+  async verifyEmail(@Res() res, @Body() dto: VerifyEmailDto) {
+    const signupVerifyToken = await this.userService.sendMemberJoinEmail(dto);
+    return HttpResponse.ok(res, signupVerifyToken);
+  }
+
+  @ApiOperation({
+    summary: '비밀번호 찾기 위한 본인 인증 코드 발송',
+    description:
+      '비밀번호 찾기 전에 본인이 가입한 이메일에 인증 코드가 발송됩니다.',
+  })
+  @ApiOkResponseTemplate()
+  @ApiBody({ type: String })
+  @Post('/find-password')
+  async findPassword(@Res() res, @Body() email: string) {
+    const signupVerifyToken = await this.userService.findPassword(email);
+    return HttpResponse.ok(res, signupVerifyToken);
   }
 }
