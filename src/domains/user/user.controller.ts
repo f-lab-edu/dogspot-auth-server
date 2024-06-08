@@ -30,6 +30,7 @@ import { UpdatePasswordDto } from './dtos/update-password.dto';
 import { VerifyEmailDto } from './dtos/verify-email.dto';
 import { VerifyEmailResponseDto } from './dtos/verify-email-response.dto';
 import { DeleteUserDto } from './dtos/delete-user.dto';
+import { CheckNicknameDto } from './dtos/check-nickname.dto';
 
 @ApiTags(SwaggerTag.USER)
 @ApiCommonErrorResponseTemplate()
@@ -171,5 +172,24 @@ export class UserController {
   async remove(@Res() res, @Body() dto: DeleteUserDto, @AuthUser() user: User) {
     await this.userService.removeByPassword(dto, user.idx);
     return HttpResponse.ok(res);
+  }
+
+  @ApiOperation({
+    summary: '닉네임 중복 확인',
+    description: '회원 정보 수정 화면에서 닉네임 중복 확인을한다.',
+  })
+  @ApiOkResponseTemplate({ description: '중복이면 true, 아니면 false 리턴' })
+  @ApiErrorResponseTemplate([
+    {
+      status: StatusCodes.CONFLICT,
+      errorFormatList: [HttpErrorConstants.EXIST_NICKNAME],
+    },
+  ])
+  @UseAuthGuards()
+  @ApiBody({ type: CheckNicknameDto })
+  @Post('/nickname')
+  async existNickname(@Res() res, @Body() dto: CheckNicknameDto) {
+    const isExist = await this.userService.checkExistNickname(dto.nickname);
+    return HttpResponse.ok(res, isExist);
   }
 }
