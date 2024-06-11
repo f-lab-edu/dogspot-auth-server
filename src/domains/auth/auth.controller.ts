@@ -1,8 +1,4 @@
-import { JwtRefreshGuard } from './auth-guards/refresh-guard';
-import { ApiCreatedResponseTemplate } from './../../core/swagger/api-created-response';
-import HttpResponse from 'src/core/http/http-response';
-import { AuthService } from './auth.service';
-import { SwaggerTag } from '../../core/swagger/swagger-tags';
+import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -12,7 +8,15 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { StatusCodes } from 'http-status-codes';
+
+import { JwtRefreshGuard } from './auth-guards/refresh-guard';
+import { AuthService } from './auth.service';
+import UseAuthGuards from './auth-guards/use-auth';
+
+import { ApiCreatedResponseTemplate } from './../../core/swagger/api-created-response';
+import HttpResponse from 'src/core/http/http-response';
+import { SwaggerTag } from '../../core/swagger/swagger-tags';
 import { LoginUserDto } from './dtos/login-user.dto';
 import { ApiCommonErrorResponseTemplate } from 'src/core/swagger/api-error-common-response';
 import {
@@ -21,15 +25,13 @@ import {
 } from './dtos/login-response.dto';
 import { RefreshTokenDto } from './dtos/refresh-token.dto';
 import { ApiErrorResponseTemplate } from 'src/core/swagger/apt-error-response';
-import { StatusCodes } from 'http-status-codes';
 import { HttpErrorConstants } from 'src/core/http/http-error-objects';
-import UseAuthGuards from './auth-guards/use-auth';
 import AuthUser from 'src/core/decorators/auth-user.decorator';
 import { User } from '../user/entities/user.entity';
 
 @ApiTags(SwaggerTag.AUTH)
 @ApiCommonErrorResponseTemplate()
-@Controller('/auth')
+@Controller('/login')
 export class AuthController {
   constructor(private authService: AuthService) {}
 

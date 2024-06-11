@@ -1,7 +1,6 @@
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-// import { setNestApp } from './core/http/interceptors';
 import { initSwagger } from './core/swagger/swagger-config';
 import { logger } from './utils/logger';
 
