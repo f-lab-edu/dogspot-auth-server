@@ -13,7 +13,7 @@ async function bootstrap() {
   );
 
   const app = await NestFactory.create(AppModule);
-
+  app.setGlobalPrefix('auth'); // '/api' 대신 'api'를 설정합니다.
   // 스웨거 시작
   initSwagger(app);
 
