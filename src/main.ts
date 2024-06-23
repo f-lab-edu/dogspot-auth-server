@@ -26,7 +26,7 @@ async function bootstrap() {
   // cors 설정x
   app.enableCors();
 
-  await app.listen(3000);
+  await app.listen(3001);
 
   // 어플리케이션이 클라이언트의 요청처리가 가능한 상태가 되었을때 pm2에 ready신호를 보내기 (process.send 함수는 pm2로 실행되었을 경우에만 존재하여 분기처리를 했다)
   if (process.send) {
