@@ -13,6 +13,7 @@ export const swaggerConfig = new DocumentBuilder()
   .setTitle('Dog Spot Rest API')
   .setDescription('Swagger API description') //todo: api-readme 작성하기
   .setVersion('1.0')
+  .addServer('https://dogspot.site/auth')
   .addBearerAuth(
     {
       type: 'http',
