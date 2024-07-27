@@ -5,15 +5,18 @@ import {
   SwaggerModule,
 } from '@nestjs/swagger';
 
+function isLocalhost() {
+  const currentURL = process.env.CURRENT_URL || 'http://localhost'; // 실제 환경에 맞게 URL을 설정해야 합니다.
+  return currentURL.includes('localhost');
+}
+
 /**
  * 스웨거 설정 파일
  */
-
-export const swaggerConfig = new DocumentBuilder()
+const swaggerConfigBuilder = new DocumentBuilder()
   .setTitle('Dog Spot Rest API')
   .setDescription('Swagger API description') //todo: api-readme 작성하기
   .setVersion('1.0')
-  .addServer('https://dogspot.site/auth')
   .addBearerAuth(
     {
       type: 'http',
@@ -22,8 +25,13 @@ export const swaggerConfig = new DocumentBuilder()
       in: 'header',
     },
     'accessToken',
-  )
-  .build();
+  );
+
+if (!isLocalhost()) {
+  swaggerConfigBuilder.addServer('https://dogspot.site/auth');
+}
+
+export const swaggerConfig = swaggerConfigBuilder.build();
 
 export const initSwagger = async (app: INestApplication) => {
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
